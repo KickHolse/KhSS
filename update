@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────── #
+#                 ▒███████▒ ███▄    █     ──          #
+#                 ▒ ▒ ▒ ▄▀░ ██ ▀█   █                 #
+#     ───         ░ ▒ ▄▀▒░ ▓██  ▀█ ██▒                #
+#                   ▄▀▒   ░▓██▒  ▐▌██▒                #
+#                 ▒███████▒▒██░   ▓██░                #
+#                 ░▒▒ ▓░▒░▒░ ▒░   ▒ ▒                 #
+#                 ░░▒ ▒ ░ ▒░ ░░   ░ ▒░                #
+#                 ░ ░ ░ ░ ░   ░   ░ ░      ───        #
+#                   ░ ░             ░                 #
+#   ─             ░                                   #
+# ─────────────────────────────────────────────────── #
+options:
+#	Nome: KhSS | Autor: Kiberzn
+	version: 1.5
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# events
+join:
+	khcore_notifyUpdate(player, "KhSS", "khss", "68835", "{@version}", "ss atualizar")
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# commands
+command /ss [<text = help>]:
+	permission: khss.*
+	permission message: §3[KhSS] §7v{@version} §f- §7Criado por §6Kiberzn§7.
+	trigger:
+		arg 1 == "help":
+			send "%nl%&e  Ajuda - SS 1/1%nl% "
+			send "&3 /ss atualizar &f- &7Atualiza o skript%nl%"
+		arg 1 == "atualizar":
+			khcore_update(player, "%{khss::check_update}%", "KhSS", script)
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# filemanager
+function khss_filemanager(use: text):
+	{_use} == "create":
+		khcore_downGithub("KhLogin/language.yml", "https://raw.githubusercontent.com/KickHolse/KhLogin/main/files/language")
+		file "plugins/KhLogin/locations.yml" doesn't exist:
+			create file "plugins/KhLogin/locations.yml"
+			set yml value "locations.lobby" of file "plugins/KhLogin/locations.yml" to "null"
+		khlogin_filemanager("value")
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# functions and sub
+
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
+# load
+load:
+	#khlogin_filemanager("create")
+	wait 1 second
+	file "plugins/Skript/scripts/KhCore.sk" exists:
+		send "&3[KHSS] &aKhCore was found successfully" to console
+	else:
+		send "&3[KHSS] &cKhCore was not found successfully" to console
+	text from "https://api.spigotmc.org/legacy/update.php?resource=68835" != "{@version}":
+		set {khss::check_update} to "true"
+		send "&3[KHSS] &cYou are not using the latest version of skript" to console
+	else:
+		send "&3[KHSS] &aYou are using the latest version of skript" to console
+	send "&3[KHSS] &aKhSS &8v{@version} &aenabled!" to console
