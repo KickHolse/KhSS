@@ -1,2 +1,3 @@
 locations:
-  ss: 'null'
+  join: 'null'
+  quit: 'null'
