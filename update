@@ -1,24 +1,51 @@
 # ─────────────────────────────────────────────────── #
-#                 ▒███████▒ ███▄    █     ──          #
-#                 ▒ ▒ ▒ ▄▀░ ██ ▀█   █                 #
-#     ───         ░ ▒ ▄▀▒░ ▓██  ▀█ ██▒                #
-#                   ▄▀▒   ░▓██▒  ▐▌██▒                #
-#                 ▒███████▒▒██░   ▓██░                #
-#                 ░▒▒ ▓░▒░▒░ ▒░   ▒ ▒                 #
-#                 ░░▒ ▒ ░ ▒░ ░░   ░ ▒░                #
-#                 ░ ░ ░ ░ ░   ░   ░ ░      ───        #
-#                   ░ ░             ░                 #
-#   ─             ░                                   #
+#                    ██ ▄█▀  ██████                   #
+#                    ██▄█▒ ▒██    ▒                   #
+#                   ▓███▄░ ░ ▓██▄                     #
+#                   ▓██ █▄   ▒   ██▒                  #
+#                   ▒██▒ █▄▒██████▒▒                  #
+#                   ▒ ▒▒ ▓▒▒ ▒▓▒ ▒ ░                  #
+#                   ░ ░▒ ▒░░ ░▒  ░ ░                  #
+#                   ░ ░░ ░ ░  ░  ░                    #
+#                   ░  ░         ░                    #
 # ─────────────────────────────────────────────────── #
 options:
 #	Nome: KhSS | Autor: Kiberzn
-	version: 1.5
+	version: 1.4
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 # events
 join:
 	khcore_notifyUpdate(player, "KhSS", "khss", "68835", "{@version}", "ss atualizar")
-
+chat:
+	{%player%.ss} is set:
+		cancel event
+		send replacer "{message}" with colored message in khcore_getText(player, yaml value "messages.chat" from "khss.language") to player and {%player%.ss}
+break:
+	player does not have permission "khss.*":
+		{%player%.ss} is set
+		cancel event
+place:
+	player does not have permission "khss.*":
+		{%player%.ss} is set
+		cancel event
+command:
+	command executor is player
+	player does not have permission "khss.*":
+		command is not "logar" or "login" or "register" or "registrar" or "captcha erro" or "captch correct"
+		{%player%.ss} is set
+		cancel event
+drop:
+	player does not have permission "khss.*":
+		{%player%.ss} is set
+		cancel event
+quit:
+	{%player%.ss} is set:
+		loop skutil yaml list "messages.logout-in-ss" from file "plugins/KhSS/language.yml":
+			send replacer "{player}" with khcore_roles_getColored(player) in khss_Replace(player, "%loop-value%") to {%player%.ss}
+		teleport {%player%.ss} to khcore_deserializeLocation(yaml value "locations.quit" from "khss.locations")
+		delete {%{%player%.ss}%.ss} and {%player%.ss}
+				
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 # commands
 command /ss [<text = help>]:
@@ -27,32 +54,63 @@ command /ss [<text = help>]:
 	trigger:
 		arg 1 == "help":
 			send "%nl%&e  Ajuda - SS 1/1%nl% "
-			send "&3 /ss atualizar &f- &7Atualiza o skript%nl%"
+			send "&3 /ss <jogador> &f- &7Prende ou libera o jogador"
+			send "&3 /ss atualizar &f- &7Atualiza o skript"
+			send "&3 /ss lquit &f- &7Seta a SS"
+			send "&3 /ss ljoin &f- &7Seta o local final da SS%nl%"
+		arg 1 != "lquit" or "ljoin" or "atualizar" or "help":
+			set {_arg} to arg 1 parsed as offlineplayer
+			{_arg} == player:
+				send yaml value "messages.self" from "khss.language"
+				stop
+			{_arg} is not online:
+				send yaml value "messages.offline" from "khss.language"
+				stop
+			{%arg 1 parsed as offlineplayer%.ss} is not set:
+				set {%player%.ss} to arg 1 parsed as player
+				set {%arg 1 parsed as player%.ss} to "%player%" parsed as player
+				send replacer "{player}" with khcore_roles_getColored(arg 1 parsed as offlineplayer) in yaml value "messages.sucess" from "khss.language"
+				yaml value "locations.join" from "khss.locations" != "null":
+					teleport player and arg 1 parsed as player to khcore_deserializeLocation(yaml value "locations.join" from "khss.locations")
+					loop skutil yaml list "messages.teleported-to-ss" from file "plugins/KhSS/language.yml":
+						send khss_Replace(player, "%loop-value%") to arg 1 parsed as player
+				else:
+					send "&cUtilize /ss ljoin para definir a localização da ss"
+			else:
+				teleport player and arg 1 parsed as player to khcore_deserializeLocation(yaml value "locations.quit" from "khss.locations")
+				delete {%player%.ss} and {%arg 1 parsed as player%.ss}
+				send khss_Replace(player, yaml value "messages.release-from-ss" from "khss.language") to arg 1 parsed as player
 		arg 1 == "atualizar":
 			khcore_update(player, "%{khss::check_update}%", "KhSS", script)
+		loop "lquit" and "ljoin":
+			arg 1 == loop-value:
+				set {_x} to replacer "l" with "" in "%loop-value%"
+				set yml value "locations.%{_x}%" of file "plugins/KhSS/locations.yml" to khcore_serializeLocation(player's location)
+				send actionbar "&aLocalização definida com sucesso!" to player
+				khss_filemanager()
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 # filemanager
-function khss_filemanager(use: text):
-	{_use} == "create":
-		khcore_downGithub("KhLogin/language.yml", "https://raw.githubusercontent.com/KickHolse/KhLogin/main/files/language")
-		file "plugins/KhLogin/locations.yml" doesn't exist:
-			create file "plugins/KhLogin/locations.yml"
-			set yml value "locations.lobby" of file "plugins/KhLogin/locations.yml" to "null"
-		khlogin_filemanager("value")
+function khss_filemanager():
+	loop "locations" and "language":
+		khcore_downGithub("KhSS/%loop-value%.yml", "https://raw.githubusercontent.com/KickHolse/KhSS/main/files/%loop-value%")
+	loop currently loaded yaml files:
+		loop-value contains "khss.locations" or "khss.language"
+		unload yaml loop-value
+	loop "language" and "locations":
+		load yaml "plugins/KhSS/%loop-value%.yml" as "khss.%loop-value%"
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# functions and sub
+# functions
+function khss_Replace(p: player, var: text) :: text:
+	replace all "{staffer}" with khcore_roles_getColored({_p}) in {_var}
+	return colored {_var}
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
 # load
 load:
-	#khlogin_filemanager("create")
+	khss_filemanager()
 	wait 1 second
-	file "plugins/Skript/scripts/KhCore.sk" exists:
-		send "&3[KHSS] &aKhCore was found successfully" to console
-	else:
-		send "&3[KHSS] &cKhCore was not found successfully" to console
 	text from "https://api.spigotmc.org/legacy/update.php?resource=68835" != "{@version}":
 		set {khss::check_update} to "true"
 		send "&3[KHSS] &cYou are not using the latest version of skript" to console
