@@ -1,2 +1,25 @@
 # Skript feito por Kick Holse
 # Discord: https://www.kskripts.tk/discord
+
+messages:
+  chat: '{prefix}{player}&f: {message}'
+  self: '&cVocê não pode puxar você mesmo para a ss.'
+  sucess: '&aVocê prendeu o jogador {player} &ana &6SS&a.'
+  offline: '&cEste jogador não esta online no momento.'
+  release-from-ss: '&aVocê foi liberado da &6SS&a por {staffer}&a.'
+  logout-in-ss:
+  - ''
+  - ' &cO jogador {player} &csaiu do servidor'
+  - ' &cenquanto estava na &6SS&c.'
+  - ''
+  - ' &cUtilize o comando a seguir para aplicar a punição:'
+  - ' &7/ban {player} &7Deslogar em SS'
+  - ''
+  teleported-to-ss:
+  - ''
+  - ' &aO jogador {staffer} &alhe puxou para &6SS&a.'
+  - ' &aEle irá lhe examinar, caso encontre algo suspeito, você sofrerá uma punição, caso contrario será liberado!'
+  - ''
+  - '  &7Envie seu id (Anydesk) no chat para que a verificação possa ser realizada!'
+  - '  &7Caso não tenha, baixe-o!'
+  - ''
