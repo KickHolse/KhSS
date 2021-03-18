@@ -10,7 +10,7 @@
 #                   ░  ░         ░                    #
 # ─────────────────────────────────────────────────── #
 options:
-#	Nome: KhSS | Autor: Kiberzn
+#	Nome: KhSS | Autor: Kick Holse
 	version: 1.5
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
@@ -50,7 +50,7 @@ quit:
 # commands
 command /ss [<text = help>]:
 	permission: khss.*
-	permission message: §3[KhSS] §7v{@version} §f- §7Criado por §6Kiberzn§7.
+	permission message: §3[KhSS] §7v{@version} §f- §7Criado por §6Kick Holse§7.
 	trigger:
 		arg 1 == "help":
 			send "%nl%&e  Ajuda - SS 1/1%nl% "
@@ -81,7 +81,7 @@ command /ss [<text = help>]:
 				delete {%player%.ss} and {%arg 1 parsed as player%.ss}
 				send khss_Replace(player, yaml value "messages.release-from-ss" from "khss.language") to arg 1 parsed as player
 		arg 1 == "atualizar":
-			khcore_update(player, "%{khss::check_update}%", "KhSS", script)
+			khcore update player {khss::check_update} "KhSS" script
 		loop "lquit" and "ljoin":
 			arg 1 == loop-value:
 				set {_x} to replacer "l" with "" in "%loop-value%"
@@ -93,7 +93,7 @@ command /ss [<text = help>]:
 # filemanager
 function khss_filemanager():
 	loop "locations" and "language":
-		khcore_downGithub("KhSS/%loop-value%.yml", "https://raw.githubusercontent.com/KickHolse/KhSS/main/files/%loop-value%")
+		khcore downgit "KhSS/%loop-value%.yml" "https://raw.githubusercontent.com/KickHolse/KhSS/main/files/%loop-value%"
 	loop currently loaded yaml files:
 		loop-value contains "khss.locations" or "khss.language"
 		unload yaml loop-value
@@ -110,9 +110,10 @@ function khss_Replace(p: player, var: text) :: text:
 # load
 load:
 	khss_filemanager()
+	delete {khss::check_update}
 	wait 1 second
 	text from "https://api.spigotmc.org/legacy/update.php?resource=68835" != "{@version}":
-		set {khss::check_update} to "true"
+		set {khss::check_update} to true
 		send "&3[KHSS] &cYou are not using the latest version of skript" to console
 	else:
 		send "&3[KHSS] &aYou are using the latest version of skript" to console
