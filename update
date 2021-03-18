@@ -1,120 +1,273 @@
-# ─────────────────────────────────────────────────── #
-#                    ██ ▄█▀  ██████                   #
-#                    ██▄█▒ ▒██    ▒                   #
-#                   ▓███▄░ ░ ▓██▄                     #
-#                   ▓██ █▄   ▒   ██▒                  #
-#                   ▒██▒ █▄▒██████▒▒                  #
-#                   ▒ ▒▒ ▓▒▒ ▒▓▒ ▒ ░                  #
-#                   ░ ░▒ ▒░░ ░▒  ░ ░                  #
-#                   ░ ░░ ░ ░  ░  ░                    #
-#                   ░  ░         ░                    #
-# ─────────────────────────────────────────────────── #
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
+#	 █░▄▀ █░░█ █▀▀▀█ █░█ █▀▀█ ░▀░ █▀▀█ ▀▀█▀▀ █▀▀      #
+#	 █▀▄░ █▀▀█ ▀▀▀▄▄ █▀▄ █▄▄▀ ▀█▀ █░░█ ░░█░░ ▀▀█      #
+#	 █░▒█ ▀░░▀ █▄▄▄█ ▀░▀ ▀░▀▀ ▀▀▀ █▀▀▀ ░░▀░░ ▀▀▀      #
+#                ╔╦╗╔╗─╔══╗────────                   #
+#                ║╔╝║║─╚╗╗║╔═╗╔═╦═╗                   #
+#                ║╚╗║╚╗╔╩╝║║╩╣╚╗║╔╝                   #
+#                ╚╩╝╚═╝╚══╝╚═╝─╚═╝─                   #
+#                ──────────────────                   #
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 options:
-#	Nome: KhSS | Autor: Kick Holse
-	version: 1.5
-
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# events
-join:
-	khcore_notifyUpdate(player, "KhSS", "khss", "68835", "{@version}", "ss atualizar")
-chat:
-	{%player%.ss} is set:
-		cancel event
-		send replacer "{message}" with colored message in khcore_getText(player, yaml value "messages.chat" from "khss.language") to player and {%player%.ss}
-break:
-	player does not have permission "khss.*":
-		{%player%.ss} is set
-		cancel event
-place:
-	player does not have permission "khss.*":
-		{%player%.ss} is set
-		cancel event
-command:
-	command executor is player
-	player does not have permission "khss.*":
-		command is not "logar" or "login" or "register" or "registrar" or "captcha erro" or "captch correct"
-		{%player%.ss} is set
-		cancel event
-drop:
-	player does not have permission "khss.*":
-		{%player%.ss} is set
-		cancel event
-quit:
-	{%player%.ss} is set:
-		loop skutil yaml list "messages.logout-in-ss" from file "plugins/KhSS/language.yml":
-			send replacer "{player}" with khcore_roles_getColored(player) in khss_Replace(player, "%loop-value%") to {%player%.ss}
-		teleport {%player%.ss} to khcore_deserializeLocation(yaml value "locations.quit" from "khss.locations")
-		delete {%{%player%.ss}%.ss} and {%player%.ss}
-				
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# commands
-command /ss [<text = help>]:
-	permission: khss.*
-	permission message: §3[KhSS] §7v{@version} §f- §7Criado por §6Kick Holse§7.
+	versao: v1.4
+#	Autor: Kick Holse | Nome: KhSS
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━#
+# localização de pastas
+options:
+	config-file: plugins/KhSS/config.yml
+	lang-file: plugins/KhSS/lang.yml
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━#
+# /ss
+command /ss [<offlineplayer>] [<text>]:
+	aliases: /screenshare
 	trigger:
-		arg 1 == "help":
-			send "%nl%&e  Ajuda - SS 1/1%nl% "
-			send "&3 /ss <jogador> &f- &7Prende ou libera o jogador"
-			send "&3 /ss atualizar &f- &7Atualiza o skript"
-			send "&3 /ss lquit &f- &7Seta a SS"
-			send "&3 /ss ljoin &f- &7Seta o local final da SS%nl%"
-		arg 1 != "lquit" or "ljoin" or "atualizar" or "help":
-			set {_arg} to arg 1 parsed as offlineplayer
-			{_arg} == player:
-				send yaml value "messages.self" from "khss.language"
+		if arg 1 is not set:
+			if player has permission "khss.puxar" or "khss.liberar" or "khss.loc.del" or "khss.loc.set" or "khss.*":
+				send "" to player
+				send "&dAjuda - ScreenShare 1/1" to player
+				send "" to player
+				if {sspos} is not set:
+					send json of "&6/ss loc set &f- &7Seta o local do ss." tooltip "&bClique aqui para abrir o comando!" suggest "/ss loc set " to player
+				if {sspos} is set:
+					send json of "&6/ss loc del &f- &7Deleta o local do ss." tooltip "&bClique aqui para abrir o comando!" suggest "/ss loc del " to player
+				send json of "&6/ss &f- &7Prende na ss." tooltip "&bClique aqui para abrir o comando!" suggest "/ss " to player
+				send json of "&6/ss liberar &f- &7Libera da ss." tooltip "&bClique aqui para abrir o comando!" suggest "/ss liberar " to player
+				send "" to player
 				stop
-			{_arg} is not online:
-				send yaml value "messages.offline" from "khss.language"
-				stop
-			{%arg 1 parsed as offlineplayer%.ss} is not set:
-				set {%player%.ss} to arg 1 parsed as player
-				set {%arg 1 parsed as player%.ss} to "%player%" parsed as player
-				send replacer "{player}" with khcore_roles_getColored(arg 1 parsed as offlineplayer) in yaml value "messages.sucess" from "khss.language"
-				yaml value "locations.join" from "khss.locations" != "null":
-					teleport player and arg 1 parsed as player to khcore_deserializeLocation(yaml value "locations.join" from "khss.locations")
-					loop skutil yaml list "messages.teleported-to-ss" from file "plugins/KhSS/language.yml":
-						send khss_Replace(player, "%loop-value%") to arg 1 parsed as player
+		else:
+			if arg 1 is "reload":
+				if player has permission "khss.reload":
+					if file "{@config-file}" doesn't exists:
+						create file "{@config-file}"
+						set yml value "check-update" of file "{@config-file}" to "true"
+						set yml value "version" of file "{@config-file}" to "{@versao}"
+						skutilities write "" at line 1 to file "{@config-file}"
+						skutilities write "## Check for updates if you set to true." at line 2 to file "{@config-file}"
+						skutilities write "## Do not edit this." at line 4 to file "{@config-file}"
+					if file "{@lang-file}" doesn't exists:
+						create file "{@lang-file}"
+						set yml value "settings.chat-format" of file "{@lang-file}" to "$6[SS] $7{prefix}{player}$a: $7{message}"
+						set yml value "messages.errors.pull-yourself" of file "{@lang-file}" to "$cVoce nao pode puxar a si mesmo. "
+						set yml value "messages.errors.player-is-not-on-ss" of file "{@lang-file}" to "$cEste jogador nao esta na ss. "
+						set yml value "messages.errors.player-offline" of file "{@lang-file}" to "$cEste jogador atualmente esta offline. "
+						set yml value "messages.errors.logout-in-ss" of file "{@lang-file}" to "\n$6[SS] $cVoce nao pode jogar em nosso servidor sem sair do SS.\n "
+						set yml value "messages.errors.no-permission" of file "{@lang-file}" to "$fComando desconhecido. "
+						set yml value "kick.release" of file "{@lang-file}" to "$c$lKLDEV - MINIGAMES\n\n$cVoce foi liberado da SS. "
+						set yml value "broadcasts.pull-to-ss" of file "{@lang-file}" to "\n$6[SS] $aO staff $c{staffer} $apuxou $c{player} $apara a SS.\n "
+						set yml value "broadcasts.release" of file "{@lang-file}" to "\n$6[SS] $aO staff $c{staffer} $aliberou o jogador $c{player} $ado SS.\n "
+						set yml value "broadcasts.logout-in-ss" of file "{@lang-file}" to "\n$6[SS] $aO jogador $c{player} $atentou deslogar enquanto estava no SS.\n "
+						set yml value "titles.pull-to-ss.title" of file "{@lang-file}" to "$aVoce foi puxado para o "
+						set yml value "titles.pull-to-ss.subtitle" of file "{@lang-file}" to "$c$lSS "
+					set {khss_chatformat} to yaml value "settings.chat-format" of file "{@lang-file}"
+					set {khss_msg.puxarpasi} to yaml value "messages.errors.pull-yourself" of file "{@lang-file}"
+					set {khss_msg.naoestanass} to yaml value "messages.errors.player-is-not-on-ss" of file "{@lang-file}"
+					set {khss_msg.offline} to yaml value "messages.errors.player-offline" of file "{@lang-file}"
+					set {khss_msg.logout} to yaml value "messages.errors.logout-in-ss" of file "{@lang-file}"
+					set {khss_msg.noperm} to yaml value "messages.errors.no-permission" of file "{@lang-file}"
+					set {khss_kick} to yaml value "kick.release" of file "{@lang-file}"
+					set {khss_bc.puxar} to yaml value "broadcasts.pull-to-ss" of file "{@lang-file}"
+					set {khss_bc.liberar} to yaml value "broadcasts.release" of file "{@lang-file}"
+					set {khss_bc.deslogar} to yaml value "broadcasts.logout-in-ss" of file "{@lang-file}"
+					set {khss_tm.puxar-1} to yaml value "titles.pull-to-ss.title" of file "{@lang-file}"
+					set {khss_tm.puxar-2} to yaml value "titles.pull-to-ss.subtitle" of file "{@lang-file}"
+					set {khss_update} to yaml value "check-update" of file "{@config-file}"
+					replace all "$" in {khss_chatformat} with "§"
+					replace all "$" in {khss_msg.puxarpasi} with "§"
+					replace all "$" in {khss_msg.naoestanass} with "§"
+					replace all "$" in {khss_msg.offline} with "§"
+					replace all "$" in {khss_msg.noperm} with "§"
+					replace all "$" in {khss_msg.logout} with "§"
+					replace all "\n" in {khss_msg.logout} with "%nl%"
+					replace all "$" in {khss_kick} with "§"
+					replace all "\n" in {khss_kick} with "%nl%"
+					replace all "$" in {khss_bc.puxar} with "§"
+					replace all "\n" in {khss_bc.puxar} with "%nl%"
+					replace all "$" in {khss_bc.liberar} with "§"
+					replace all "\n" in {khss_bc.liberar} with "%nl%"
+					replace all "$" in {khss_bc.deslogar} with "§"
+					replace all "\n" in {khss_bc.deslogar} with "%nl%"
+					replace all "$" in {khss_tm.puxar-1} with "§"
+					replace all "$" in {khss_tm.puxar-2} with "§"
+					replace all "$" in {khss_update} with "§"
 				else:
-					send "&cUtilize /ss ljoin para definir a localização da ss"
+					send "%{khss_msg.noperm}%" to player
+			if arg 1 is "loc":
+				if arg 2 is "set":
+					if player has permission "khss.loc.set" or "khss.*":
+						if {sspos} is set:
+							set action bar of player to "&cA localização do ss já foi definida."
+						else:
+							set {sspos} to location of player
+							set action bar of player to "&aNova localização do ss definida com sucesso."
+					else:
+						send "%{khss_msg.noperm}%" to player
+				if arg 2 is "del":
+					if player has permission "khss.loc.del" or "khss.*":
+						if {sspos} is not set:
+							set action bar of player to "&cA localização do ss não foi definida."
+						else:
+							clear {sspos}
+							set action bar of player to "&aA localização do ss foi deletada com sucesso."
+					else:
+						send "%{khss_msg.noperm}%" to player
 			else:
-				teleport player and arg 1 parsed as player to khcore_deserializeLocation(yaml value "locations.quit" from "khss.locations")
-				delete {%player%.ss} and {%arg 1 parsed as player%.ss}
-				send khss_Replace(player, yaml value "messages.release-from-ss" from "khss.language") to arg 1 parsed as player
-		arg 1 == "atualizar":
-			khcore update player {khss::check_update} "KhSS" script
-		loop "lquit" and "ljoin":
-			arg 1 == loop-value:
-				set {_x} to replacer "l" with "" in "%loop-value%"
-				set yml value "locations.%{_x}%" of file "plugins/KhSS/locations.yml" to khcore_serializeLocation(player's location)
-				send actionbar "&aLocalização definida com sucesso!" to player
-				khss_filemanager()
-
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# filemanager
-function khss_filemanager():
-	loop "locations" and "language":
-		khcore downgit "KhSS/%loop-value%.yml" "https://raw.githubusercontent.com/KickHolse/KhSS/main/files/%loop-value%"
-	loop currently loaded yaml files:
-		loop-value contains "khss.locations" or "khss.language"
-		unload yaml loop-value
-	loop "language" and "locations":
-		load yaml "plugins/KhSS/%loop-value%.yml" as "khss.%loop-value%"
-
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# functions
-function khss_Replace(p: player, var: text) :: text:
-	replace all "{staffer}" with khcore_roles_getColored({_p}) in {_var}
-	return colored {_var}
-
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── #
-# load
-load:
-	khss_filemanager()
-	delete {khss::check_update}
-	wait 1 second
-	text from "https://api.spigotmc.org/legacy/update.php?resource=68835" != "{@version}":
-		set {khss::check_update} to true
-		send "&3[KHSS] &cYou are not using the latest version of skript" to console
+				if arg 1 is "liberar":
+					if arg 2 is set:
+						if player has permission "khss.liberar" or "khss.*":
+							if {ss.%arg 2%} is true:
+								set {ss.%arg 2%} to false
+								set {ss.%player%} to false
+								replace all "{staffer}" in {khss_bc.liberar} with "%player%"
+								replace all "{player}" in {khss_bc.liberar} with "%offlineplayer-arg%"
+								kick offlineplayer-arg due to "%{khss_kick}%"
+								broadcast "%{khss_bc.liberar}%"
+							else:
+								set action bar of player to "%{khss_msg.naoestanass}%"
+						else:
+							send "%{khss_msg.noperm}%" to player
+				else:
+					if player has permission "khss.puxar" or "khss.*":
+						if offlineplayer-arg is "%player%":
+							set action bar of player to "%{khss_msg.puxarpasi}%"
+							stop
+						else:
+							if offlineplayer-arg is not online:
+								set action bar of player to "%{khss_msg.offline}%"
+								stop
+							else:
+								set {ss.%player%} to true
+								set {ss.%offlineplayer-arg%} to true
+								teleport offlineplayer-arg to {sspos}
+								teleport player to {sspos}
+								replace all "{staffer}" in {khss_bc.puxar} with "%player%"
+								replace all "{player}" in {khss_bc.puxar} with "%offlineplayer-arg%"
+								send offlineplayer-arg title "%{khss_tm.puxar-1}%" with subtitle "%{khss_tm.puxar-2}%" for 5 second
+								broadcast "%{khss_bc.puxar}%"
+					else:
+						send "%{khss_msg.noperm}%" to player
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━#
+# chat
+on chat:
+	loop all players:
+		if {ss.%loop-player%} is true:
+			cancel event
+			replace all "{prefix}" in {khss_chatformat} with "%coloured player's prefix%"
+			replace all "{suffix}" in {khss_chatformat} with "%coloured player's suffix%"
+			replace all "{player}" in {khss_chatformat} with "%player%"
+			replace all "{message}" in {khss_chatformat} with "%coloured message%"
+			play "CHICKEN_EGG_POP" to loop-players at volume 1.2
+			send "%{khss_chatformat}%" to loop-players
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━#
+# block
+on break:
+	if player does not have permission "khss.block" or "khss.*":
+		if {ss.%player%} is true:
+			cancel event
+			stop
+on place:
+	if player does not have permission "khss.block" or "khss.*":
+		if {ss.%player%} is true:
+			cancel event
+			stop
+on command:
+	if player does not have permission "khss.block" or "khss.*":
+		if command executor is player:
+			if command is not "logar" or "login" or "register" or "registrar" or "captcha erro" or "captch correct":
+				if {ss.%player%} is true:
+					cancel event
+					stop
+on drop:
+	if player does not have permission "khss.block" or "khss.*":
+		if {ss.%player%} is true:
+			cancel event
+			stop
+on join:
+	if {ss.%player%} is true:
+		teleport player to {sspos}
+		if player does not have permission "khss.block" or "khss.*":
+			replace all "{player}" in {khss_bc.deslogar} with "%player%"
+			send "%{khss_msg.logout}%" to player
+			broadcast "%{khss_bc.deslogar}%"
+			stop
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━#
+on load:
+	if file "{@config-file}" doesn't exists:
+		create file "{@config-file}"
+		set yml value "check-update" of file "{@config-file}" to "true"
+		set yml value "version" of file "{@config-file}" to "{@versao}"
+		skutilities write "" at line 1 to file "{@config-file}"
+		skutilities write "## Check for updates if you set to true." at line 2 to file "{@config-file}"
+		skutilities write "## Do not edit this." at line 4 to file "{@config-file}"
+	if file "{@lang-file}" doesn't exists:
+		create file "{@lang-file}"
+		set yml value "settings.chat-format" of file "{@lang-file}" to "$6[SS] $7{prefix}{player}$a: $7{message}"
+		set yml value "messages.errors.pull-yourself" of file "{@lang-file}" to "$cVoce nao pode puxar a si mesmo. "
+		set yml value "messages.errors.player-is-not-on-ss" of file "{@lang-file}" to "$cEste jogador nao esta na ss. "
+		set yml value "messages.errors.player-offline" of file "{@lang-file}" to "$cEste jogador atualmente esta offline. "
+		set yml value "messages.errors.logout-in-ss" of file "{@lang-file}" to "\n$6[SS] $cVoce nao pode jogar em nosso servidor sem sair do SS.\n "
+		set yml value "messages.errors.no-permission" of file "{@lang-file}" to "$fComando desconhecido. "
+		set yml value "kick.release" of file "{@lang-file}" to "$c$lKLDEV - MINIGAMES\n\n$cVoce foi liberado da SS. "
+		set yml value "broadcasts.pull-to-ss" of file "{@lang-file}" to "\n$6[SS] $aO staff $c{staffer} $apuxou $c{player} $apara a SS.\n "
+		set yml value "broadcasts.release" of file "{@lang-file}" to "\n$6[SS] $aO staff $c{staffer} $aliberou o jogador $c{player} $ado SS.\n "
+		set yml value "broadcasts.logout-in-ss" of file "{@lang-file}" to "\n$6[SS] $aO jogador $c{player} $atentou deslogar enquanto estava no SS.\n "
+		set yml value "titles.pull-to-ss.title" of file "{@lang-file}" to "$aVoce foi puxado para o "
+		set yml value "titles.pull-to-ss.subtitle" of file "{@lang-file}" to "$c$lSS "
+	set {khss_chatformat} to yaml value "settings.chat-format" of file "{@lang-file}"
+	set {khss_msg.puxarpasi} to yaml value "messages.errors.pull-yourself" of file "{@lang-file}"
+	set {khss_msg.naoestanass} to yaml value "messages.errors.player-is-not-on-ss" of file "{@lang-file}"
+	set {khss_msg.offline} to yaml value "messages.errors.player-offline" of file "{@lang-file}"
+	set {khss_msg.logout} to yaml value "messages.errors.logout-in-ss" of file "{@lang-file}"
+	set {khss_msg.noperm} to yaml value "messages.errors.no-permission" of file "{@lang-file}"
+	set {khss_kick} to yaml value "kick.release" of file "{@lang-file}"
+	set {khss_bc.puxar} to yaml value "broadcasts.pull-to-ss" of file "{@lang-file}"
+	set {khss_bc.liberar} to yaml value "broadcasts.release" of file "{@lang-file}"
+	set {khss_bc.deslogar} to yaml value "broadcasts.logout-in-ss" of file "{@lang-file}"
+	set {khss_tm.puxar-1} to yaml value "titles.pull-to-ss.title" of file "{@lang-file}"
+	set {khss_tm.puxar-2} to yaml value "titles.pull-to-ss.subtitle" of file "{@lang-file}"
+	set {khss_update} to yaml value "check-update" of file "{@config-file}"
+	replace all "$" in {khss_chatformat} with "§"
+	replace all "$" in {khss_msg.puxarpasi} with "§"
+	replace all "$" in {khss_msg.naoestanass} with "§"
+	replace all "$" in {khss_msg.offline} with "§"
+	replace all "$" in {khss_msg.noperm} with "§"
+	replace all "$" in {khss_msg.logout} with "§"
+	replace all "\n" in {khss_msg.logout} with "%nl%"
+	replace all "$" in {khss_kick} with "§"
+	replace all "\n" in {khss_kick} with "%nl%"
+	replace all "$" in {khss_bc.puxar} with "§"
+	replace all "\n" in {khss_bc.puxar} with "%nl%"
+	replace all "$" in {khss_bc.liberar} with "§"
+	replace all "\n" in {khss_bc.liberar} with "%nl%"
+	replace all "$" in {khss_bc.deslogar} with "§"
+	replace all "\n" in {khss_bc.deslogar} with "%nl%"
+	replace all "$" in {khss_tm.puxar-1} with "§"
+	replace all "$" in {khss_tm.puxar-2} with "§"
+	replace all "$" in {khss_update} with "§"
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━#
+# atualiações
+on load:
+	send "&3[Kh:SS] &eVerificando atualizacoes..." to console
+	wait 2 seconds
+	if text from "https://api.spigotmc.org/legacy/update.php?resource=68835" is not "{@versao}":
+		send "&3[Kh:SS] &cVoce nao esta usando a ultima versao do skript." to console
 	else:
-		send "&3[KHSS] &aYou are using the latest version of skript" to console
-	send "&3[KHSS] &aKhSS &8v{@version} &aenabled!" to console
+		send "&3[Kh:SS] &aVoce esta usando a ultima versao do skript." to console
+	wait 2 seconds
+	send "&3[Kh:SS] &eAtivando plugin..." to console
+	wait 3 seconds
+	send "&7&m--------------------------------------------" to console
+	send " " to console
+	send "&aKhScreenShare &8({@versao}) &aativado!" to console
+	send " " to console
+	send "&7&m--------------------------------------------" to console
+on unload:
+	send "&7&m--------------------------------------------" to console
+	send " " to console
+	send "&cKhScreenShare &8({@versao}) &cdesativado!" to console
+	send " " to console
+	send "&7&m--------------------------------------------" to console
+on join:
+	if text from "https://api.spigotmc.org/legacy/update.php?resource=68835" is not "{@versao}":
+		if {khss_update} is "true":
+			if player has permission "khss.update" or "khss.*":
+				send json of "&6[KhSS] &7Existe &7uma &7nova &7atualização &7do &7skript, &7para &7visitar &7o &7site &7clique " then "&a&lAQUI!" tooltip "&bClique aqui para ir ao site de download." open "https://www.spigotmc.org/resources/khscreenshare.68835/" to player
